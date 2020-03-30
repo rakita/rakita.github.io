@@ -15,6 +15,7 @@
     "gatsby-plugin-manifest": "^2.2.48",
     "gatsby-plugin-offline": "^3.0.41",
     "gatsby-plugin-react-helmet": "^3.1.24",
+    "gatsby-plugin-sass": "^2.2.1",
     "gatsby-plugin-sharp": "^2.4.13",
     "gatsby-plugin-typography": "^2.3.25",
     "gatsby-remark-copy-linked-files": "^2.1.40",
@@ -25,6 +26,7 @@
     "gatsby-source-filesystem": "^2.1.56",
     "gatsby-transformer-remark": "^2.6.59",
     "gatsby-transformer-sharp": "^2.3.19",
+    "gatsby-plugin-web-font-loader": "^1.0.4",
     "prismjs": "^1.19.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
@@ -36,6 +38,8 @@
     "typography-theme-wordpress-2016": "^0.16.19"
   },
   "devDependencies": {
+    "gatsby-plugin-scss-typescript": "^4.0.10",
+    "node-sass": "^4.13.1",
     "prettier": "^1.19.1"
   },
   "homepage": "https://github.com/gatsbyjs/gatsby-starter-blog#readme",

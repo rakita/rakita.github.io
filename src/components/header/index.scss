@@ -1,0 +1,54 @@
+.header {
+  border-bottom: 1px dashed #949494;
+  display: flex;
+  justify-content: space-between;
+  height:90px;
+  margin:0px;
+}
+
+.header-menu {
+  margin: 45px 0px 0px 15px;
+  font-size: 21px;
+  width: 125px;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Marko One";
+  color: #093750;
+
+  .link {
+    padding: 2px;
+  }
+}
+
+.header-logo {
+  font-size: 36px;
+  margin:15px 15px 0px 0px;
+  padding:0px;
+  color: #093750;
+
+  h1 {
+    font-size: 36px;
+    margin:0px;
+    padding:0px;
+    font-family: "Marko One",Helvetica, sans-serif;
+    color: #093750;
+  }
+
+  h2 {
+    font-family: "Marko One",Helvetica, sans-serif;
+    color: #093750;
+    font-size: 9px;
+    margin:0px;
+    margin-left:15px;
+    padding:0px;
+    font-family: "Marko One",Helvetica, sans-serif;
+
+  }
+}
+
+
+.link {
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+}

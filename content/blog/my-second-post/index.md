@@ -1,6 +1,8 @@
 ---
-title: My Second Post!
-date: "2015-05-06T23:46:37.121Z"
+title: Second post
+date: "2015-05-01T22:12:03.284Z"
+author: "draganrakita"
+description: "Hello World"
 ---
 
 Wow! I love blogging so much already.

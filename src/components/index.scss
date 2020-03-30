@@ -1,0 +1,29 @@
+@import '../styles/main.scss';
+
+* { padding: 0; margin: 0; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: roboto;
+  background-color: $background-color;
+  -webkit-text-size-adjust: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+
+.main {
+  max-width: 705px; //50
+  padding-left: 30px; //2
+  padding-right: 30px; //2
+  padding-bottom: 195px; //13
+  margin-left: auto;
+  margin-Right: auto;
+  margin-top: 15px; //1
+  background-color: #FAFCFF;
+}
+
+@import '../templates/index.scss';
