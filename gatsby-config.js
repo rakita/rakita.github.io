@@ -1,4 +1,5 @@
 module.exports = {
+  pathPrefix: "/bluealloy",
   siteMetadata: {
     title: `Gatsby Starter Blog`,
     author: {
@@ -12,6 +13,7 @@ module.exports = {
     },
   },
   plugins: [
+    `gatsby-plugin-csp`,
     {
       resolve: `gatsby-source-filesystem`,
       options: {
