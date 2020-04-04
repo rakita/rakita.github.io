@@ -6,8 +6,11 @@ html, body {
   height: 100%;
 }
 
+
+@import '../templates/index.scss';
+
 body {
-  font-family: roboto;
+  font-family: sans-serif;
   background-color: $background-color;
   -webkit-text-size-adjust: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -17,13 +20,14 @@ body {
 
 .main {
   max-width: 705px; //50
-  padding-left: 30px; //2
-  padding-right: 30px; //2
-  padding-bottom: 195px; //13
   margin-left: auto;
   margin-Right: auto;
   margin-top: 15px; //1
   background-color: #FAFCFF;
 }
 
-@import '../templates/index.scss';
+.content {
+  max-width: 650px;
+  margin: auto;
+  padding: 5px; //2
+}
