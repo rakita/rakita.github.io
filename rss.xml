@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Blue Alloy]]></title><description><![CDATA[Personal blog about software.]]></description><link>https://rakita.github.com</link><generator>GatsbyJS</generator><lastBuildDate>Sun, 12 Apr 2020 00:50:03 GMT</lastBuildDate><item><title><![CDATA[2D UI beginner guide. Learn to rotate/translate/scale]]></title><description><![CDATA[Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself…]]></description><link>https://rakita.github.com/2d_transformation/</link><guid isPermaLink="false">https://rakita.github.com/2d_transformation/</guid><pubDate>Tue, 01 May 2018 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself: great! this will be easy!Okay, lets google it, make some matrices and will be quickly finished… must say that it took me a bit longer. Internet didn’t help me with comprehensive solution or guide, i needed to stitch stuff together, and at the end of my frustration I got inspired to write this.
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Blue Alloy]]></title><description><![CDATA[Personal blog about software.]]></description><link>https://rakita.github.com</link><generator>GatsbyJS</generator><lastBuildDate>Sun, 12 Apr 2020 00:54:38 GMT</lastBuildDate><item><title><![CDATA[2D UI beginner guide. Learn to rotate/translate/scale]]></title><description><![CDATA[Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself…]]></description><link>https://rakita.github.com/2d_transformation/</link><guid isPermaLink="false">https://rakita.github.com/2d_transformation/</guid><pubDate>Tue, 01 May 2018 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself: great! this will be easy!Okay, lets google it, make some matrices and will be quickly finished… must say that it took me a bit longer. Internet didn’t help me with comprehensive solution or guide, i needed to stitch stuff together, and at the end of my frustration I got inspired to write this.
 I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration).&lt;/p&gt;
 &lt;h1&gt;Transformations&lt;/h1&gt;
 &lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that square matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, i know what i can do with them, and avoid manually setting things. Another things that we need to take care when matrixing is order on how we do transformation, it matters, &lt;code class=&quot;language-text&quot;&gt;T*V&lt;/code&gt; is not same as &lt;code class=&quot;language-text&quot;&gt;V*T&lt;/code&gt;.&lt;/p&gt;
@@ -24,7 +24,7 @@ I will give small intro about rotation and translation because they can be easil
     &gt;
       &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
+    href=&quot;/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -37,10 +37,10 @@ I will give small intro about rotation and translation because they can be easil
         class=&quot;gatsby-resp-image-image&quot;
         alt=&quot;Naive Scale&quot;
         title=&quot;Naive Scale&quot;
-        src=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
-        srcset=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/12f09/naive_scale.png 148w,
-/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/e4a3f/naive_scale.png 295w,
-/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png 507w&quot;
+        src=&quot;/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
+        srcset=&quot;/static/6f3b00effc29c97c4c521e48c479714d/12f09/naive_scale.png 148w,
+/static/6f3b00effc29c97c4c521e48c479714d/e4a3f/naive_scale.png 295w,
+/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png 507w&quot;
         sizes=&quot;(max-width: 507px) 100vw, 507px&quot;
         style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
         loading=&quot;lazy&quot;
@@ -55,7 +55,7 @@ I will give small intro about rotation and translation because they can be easil
     &gt;
       &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png&quot;
+    href=&quot;/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -68,11 +68,11 @@ I will give small intro about rotation and translation because they can be easil
         class=&quot;gatsby-resp-image-image&quot;
         alt=&quot;Scale&quot;
         title=&quot;Scale&quot;
-        src=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png&quot;
-        srcset=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/12f09/scale.png 148w,
-/bluealloy/static/b780559502173020b052b2ffee8a4abf/e4a3f/scale.png 295w,
-/bluealloy/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png 590w,
-/bluealloy/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png 736w&quot;
+        src=&quot;/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png&quot;
+        srcset=&quot;/static/b780559502173020b052b2ffee8a4abf/12f09/scale.png 148w,
+/static/b780559502173020b052b2ffee8a4abf/e4a3f/scale.png 295w,
+/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png 590w,
+/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png 736w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
         style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
         loading=&quot;lazy&quot;
@@ -90,7 +90,7 @@ I will give small intro about rotation and translation because they can be easil
     &gt;
       &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
+    href=&quot;/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -103,10 +103,10 @@ I will give small intro about rotation and translation because they can be easil
         class=&quot;gatsby-resp-image-image&quot;
         alt=&quot;Naive Scale&quot;
         title=&quot;Naive Scale&quot;
-        src=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
-        srcset=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/12f09/shyft_scale.png 148w,
-/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e4a3f/shyft_scale.png 295w,
-/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png 439w&quot;
+        src=&quot;/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
+        srcset=&quot;/static/b8ed71b6c0e9fc39f219724c43bbcb08/12f09/shyft_scale.png 148w,
+/static/b8ed71b6c0e9fc39f219724c43bbcb08/e4a3f/shyft_scale.png 295w,
+/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png 439w&quot;
         sizes=&quot;(max-width: 439px) 100vw, 439px&quot;
         style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
         loading=&quot;lazy&quot;
