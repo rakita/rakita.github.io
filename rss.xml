@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Blue Alloy]]></title><description><![CDATA[Personal blog about software.]]></description><link>https://rakita.github.com</link><generator>GatsbyJS</generator><lastBuildDate>Sun, 12 Apr 2020 00:50:03 GMT</lastBuildDate><item><title><![CDATA[2D UI beginner guide. Learn to rotate/translate/scale]]></title><description><![CDATA[Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself…]]></description><link>https://rakita.github.com/2d_transformation/</link><guid isPermaLink="false">https://rakita.github.com/2d_transformation/</guid><pubDate>Tue, 01 May 2018 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;Recently I had pleasure to make UI for standard rotate/scale/translate (or RST) controls on element with some bounding box. I told myself: great! this will be easy!Okay, lets google it, make some matrices and will be quickly finished… must say that it took me a bit longer. Internet didn’t help me with comprehensive solution or guide, i needed to stitch stuff together, and at the end of my frustration I got inspired to write this.
+I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration).&lt;/p&gt;
+&lt;h1&gt;Transformations&lt;/h1&gt;
+&lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that square matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, i know what i can do with them, and avoid manually setting things. Another things that we need to take care when matrixing is order on how we do transformation, it matters, &lt;code class=&quot;language-text&quot;&gt;T*V&lt;/code&gt; is not same as &lt;code class=&quot;language-text&quot;&gt;V*T&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Some info on our setup. Our original element (before transformations), has some size (original_size), its is rectangular shape (or his bounding box is), it lies in first quadrant with starting position at coordinate beginning. We are using row major order matrices (This means order of multiplication of matrices is from left to right &lt;code class=&quot;language-text&quot;&gt;Mfirst*Msecond&lt;/code&gt;)  additionally, we are using these points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt;: point from where transformation is started for rotation/scale this is corner that we selected, for translation this is point where user clicked and started to drag our element.&lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;current_point&lt;/code&gt;: current mouse point, it represent where we want to rotate/scale/translate&lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;M&lt;/code&gt; : transformation matrix that was already applied on our element.&lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;anchor_point&lt;/code&gt;: other side from ref_point, (opposite corner or side). Needed for scaling.&lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;center_point&lt;/code&gt; : ref&lt;em&gt;point-anchor&lt;/em&gt;point &lt;/li&gt;
+&lt;li&gt;&lt;code class=&quot;language-text&quot;&gt;original_size&lt;/code&gt;: Original size of our element (For some systems element can be normalized to (1,1), but for this example i think it is better to show how size affects us).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Okay, lets get started from easy to hard:&lt;/p&gt;
+&lt;h2&gt;Translation&lt;/h2&gt;
+&lt;p&gt;Translation is most simple of them all, it moves point by specified vector, and nothing more. It is used in tandem with rotation or scaling to center already moved/rotated element, but this will be explained in due time. For our UI you take point when mouse is clicked &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt;. And take current point where mouse moves &lt;code class=&quot;language-text&quot;&gt;current_point&lt;/code&gt;. get diff and create translation matrix as this &lt;code class=&quot;language-text&quot;&gt;M=M*translation(current_point-ref_point)&lt;/code&gt; and voila, we are done.&lt;/p&gt;
+&lt;h2&gt;Rotation&lt;/h2&gt;
+&lt;p&gt;Rotation is little bit more complex (it has little bit more to do) but in same rank as translation. We need reference point &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt; for selected element. Rotation is usually, not to say always, done around element center, for this we need &lt;code class=&quot;language-text&quot;&gt;center_point&lt;/code&gt;. And lastly we have &lt;code class=&quot;language-text&quot;&gt;current_point&lt;/code&gt;. As you can guest we need to find the angle between these two vectors &lt;code class=&quot;language-text&quot;&gt;x=ref_point-center_point&lt;/code&gt; and &lt;code class=&quot;language-text&quot;&gt;y=current_point-center_point&lt;/code&gt;, after consulting internet we get this equation:&lt;code class=&quot;language-text&quot;&gt;angle = atan2(norm(cross(x,y)), dot(x,y))&lt;/code&gt;. With angle found we can call function for creating matrix R, something like &lt;code class=&quot;language-text&quot;&gt;rotation(angle)&lt;/code&gt;.  Appending R to transformation matrix M is done with this simple but very used and important trick: We create another matrix of translation from elements center &lt;code class=&quot;language-text&quot;&gt;T=translation(center_point)&lt;/code&gt;, and it’s reverse &lt;code class=&quot;language-text&quot;&gt;Tinv = inverse(T)&lt;/code&gt;. Multiply them in this order: &lt;code class=&quot;language-text&quot;&gt;M=M*Tinv*R*T&lt;/code&gt; , and we get our final transformation. Basically, with Tinv we just nullified translation, we then rotate our element around center and apply T to put it back to old position.&lt;/p&gt;
+&lt;h2&gt;Scale&lt;/h2&gt;
+&lt;p&gt;And we come to scaling, it is best part of this post (it has pictures) :D. We will gradually introducing few things that needs to be done in scaling, we will see how we handle rotation, and shift/alt controls (shift is usually used for aspect ration lock and alt is mirror scale).&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto;  max-width: 507px;&quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 33.108108108108105%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAHCAYAAAAIy204AAAACXBIWXMAAA7DAAAOwwHHb6hkAAABc0lEQVQoz22Rx0sDQRSH8796EY+iYhT1bInEgr3FRETFQlAMelHw5jUHG9lYo6asuym7O1s+Z4sRwQc/Zpj35nu/eRNzPIeqWSUMR0pI2Qhh4bke1aaK4dblmRvlrHaNv3o/tZ4XEGL5Yp6R9B47c8/sr5XIbtY52dJ5ea5JhseFcs3M4hW51Q9OU2XOMjrn6QrZ1BeHazq5XZ1KuSaBbgh8/3hhI/HEcEeZRLfBVC8sDEAjMq1/tlgaMEn0CSb7Wox0FRnvfGB5CGb7ITUq+/oPk159lzF/c3nc4HARsutwMGeTyQgKqhUUVd51VuIqy4M2K4MGsz1VxpIlJuMayR6T9IQEhubwXx0TQqDrGj+hfWncKgVuFAXTaKLWmpxsGuQyrpTD2RbksnAsm27PqxxN52mVShiSEzj0gaqqRh3CwfqzI9prmoYlTH7Di2odXt9eeSrcodzfUXx8DIGu9GtZVhsYqH1N/qNsaNvO33wg/o1vXoH+ereGSqsAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Naive Scale&quot;
+        title=&quot;Naive Scale&quot;
+        src=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png&quot;
+        srcset=&quot;/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/12f09/naive_scale.png 148w,
+/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/e4a3f/naive_scale.png 295w,
+/bluealloy/static/6f3b00effc29c97c4c521e48c479714d/3ebb1/naive_scale.png 507w&quot;
+        sizes=&quot;(max-width: 507px) 100vw, 507px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Nice, lets start with basic example where our element is not rotated or translated and we want just to scale it. We will use &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt; (corner or side usually), and its &lt;code class=&quot;language-text&quot;&gt;anchor_point&lt;/code&gt; and offcorse we will need &lt;code class=&quot;language-text&quot;&gt;current_point&lt;/code&gt; to tell us where we want to scale to. We calculate &lt;code class=&quot;language-text&quot;&gt;diff=current_point-anchor_point&lt;/code&gt;, get scale as &lt;code class=&quot;language-text&quot;&gt;s=scale(diff/element_size)&lt;/code&gt; and we are done, we have scale matrix that can add to our transformation. Lets make other steps in following example.&lt;/p&gt;
+&lt;p&gt;Okay, lets now look on example when we want to take top left corner &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt; ( you can follow picture below), in that case our &lt;code class=&quot;language-text&quot;&gt;anchor_point&lt;/code&gt; is positioned at bottom and if we want to scale it properly (to top and left). First difference from previous example is that we will need to move our object so that &lt;code class=&quot;language-text&quot;&gt;anchor_point&lt;/code&gt; is in &lt;code class=&quot;language-text&quot;&gt;(0.0)&lt;/code&gt; cordinate! We still need &lt;code class=&quot;language-text&quot;&gt;diff&lt;/code&gt; and we are calculating it same as before, but because our axis are now flipped, this is second difference, we need  to reverse sign of &lt;code class=&quot;language-text&quot;&gt;diff_new=Vector(-diff.x,-diff.y)&lt;/code&gt;. Reversing &lt;code class=&quot;language-text&quot;&gt;y&lt;/code&gt; is needed for top side &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt; and reversing &lt;code class=&quot;language-text&quot;&gt;x&lt;/code&gt; for left side &lt;code class=&quot;language-text&quot;&gt;ref_point&lt;/code&gt;. We get scale as &lt;code class=&quot;language-text&quot;&gt;s=scale(diff_new/element_size)&lt;/code&gt; . And final third difference from previous example is that after all this we need to take translation of anchor T=translate(anchor_point), calculate inverse &lt;code class=&quot;language-text&quot;&gt;Tinv=inverse(T)&lt;/code&gt; and bind all together (from left to right) &lt;code class=&quot;language-text&quot;&gt;S=T*s*Tin&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto;  max-width: 590px;&quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 32.43243243243243%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAAA7DAAAOwwHHb6hkAAABVklEQVQY012RzS9kQRTF3z9rO0xiNctmhWAWFj6GGGJ2g43NJCIIIjKahMk07SuttUf3eN2q67t+qtsjMTc5qUrdW6fOOZWQVwjhA+JJ3vERBhcM3vv32U455ynuSPbXNQcbgXqqSVpZRlqpoJR+ve5zGgfFLdhY9ax9r3K8W+P/chZmCopCT53xXsHVH0GipeTh/h6hW52RLgIWrTyLI4HRzzDW5/m1LGi2HjHaYq2N6iJsYG3esTTmWBhpcF1+IlGyzW3aYOVHxurcEyuzkvPjjlpL7QYqZSifavaLV6RpjSw6UqIdH9SR0HC49cDRtuH3puKu1ibpSDcqMF3QTHyBoU+SvU35luz7KkUzt2lpxb0L0YkPzAz9Y7gv42u/5PLE5ITRRvVGUo8xlU4bFEt/UVp2+byLnxRzFUJ0A3bKULo+o/JY7fZ/Tiq+DRqmBppcnD3zAguevK1ZhqoQAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Scale&quot;
+        title=&quot;Scale&quot;
+        src=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png&quot;
+        srcset=&quot;/bluealloy/static/b780559502173020b052b2ffee8a4abf/12f09/scale.png 148w,
+/bluealloy/static/b780559502173020b052b2ffee8a4abf/e4a3f/scale.png 295w,
+/bluealloy/static/b780559502173020b052b2ffee8a4abf/fcda8/scale.png 590w,
+/bluealloy/static/b780559502173020b052b2ffee8a4abf/f941f/scale.png 736w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;As you can see diff vector is oriented to negative in reference to our axis, this is reason why we need to flip it, if we didn’t do flipping you would get small scale when moving away from top left corner.&lt;/p&gt;
+&lt;p&gt;This will all work just fine if element is not in any way rotated (Yey rotation!), with rotation we are now in bind how to calculate our diff and extract scale information. But, don’t despair, we can use same trick as we did with rotation in a way that we will take &lt;code class=&quot;language-text&quot;&gt;current_position&lt;/code&gt; and inverse of current transformation matrix &lt;code class=&quot;language-text&quot;&gt;Minv = inverse(M)&lt;/code&gt; and get &lt;code class=&quot;language-text&quot;&gt;original_position=Minv*current_position&lt;/code&gt;. Original position now presents point relative to our element before it is transformed. We get corner of original element (take care to select correct corner, it is probably jumbled up with rotation, i had something like &lt;code class=&quot;language-text&quot;&gt;handler_id&lt;/code&gt; to help me with that) and do same as we did in our last example, calculate diff as &lt;code class=&quot;language-text&quot;&gt;diff=original_position-original_corners[handler_id]&lt;/code&gt;, and if needed invert its axis. Calculate scale as &lt;code class=&quot;language-text&quot;&gt;S=scale(diff_new/element_original_size)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;!!!Final step is to incorporate our scale to calculate inverse Tinv=inverse(T) and bind all together we get scale that we want t o apply S=T&lt;em&gt;s&lt;/em&gt;Tinv. And now adding M we get something like this Mc=M&lt;em&gt;S&lt;/em&gt;Sinv*Minv. Sinv is previously applied scale but inverted we want to . We can see what is happening in picture below.&lt;/p&gt;
+&lt;h2&gt;Shift scale&lt;/h2&gt;
+&lt;p&gt;Shift scale is scaling where aspect ration is not changed. This means that scale on both axis is equal and we need to choose which axis orientation we will take as primary. We could make it simple and depending on which corner_id is selected that take modulo of two and chose x or y scale, this will work but will be unintuitive. For better solution where depending on position of mouse relative to diagonal of element we will get smother transition between x and y orientation. See picture below:&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto;  max-width: 439px;&quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 53.37837837837838%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAA7DAAAOwwHHb6hkAAACn0lEQVQoz12T608TQRTF+58aE5/RmKgxxmiiojHGSIwx2tK0tt33bluKFSzdZUurKFDe0IWiRo2KAkJfWyhR489p+aQfTs6Z5My5d+7MBNziZ0bKHUYFssVNomaZkDFDbMgjnl4kYpTJlrbJT7cZnWwxOnWI/GRTsM/IdEfoBnPuPD99n8BSLMFEskgmt4EyWmNg6AtpeZJMvERY6ETmI0ZuC9OpY9o1LHu3x5rT6mnn2QILagpPSnDQaBCoCLGuSqwYFqVsmXTJJ+v8QNXm0Yt7DBZ9km4do9DCcJto4/tC++ReVJlLDlPVZNYUGU/TDgNXEgmx0FnVNapqgiU9ydjIMqpTIzj4CcttkBwTgcUOlkAu/5HZdJ53hvBrKhWx11NVPEWhU68fBq6KdE/Xe1gVpqoSZymZZXhwjqepdVLjTazhdWxliNlYmGUpwutIiEXhe5vSWdMUKt3AWk0cuRsoFquiSpe71SqqTlWO8V6WmbCijKlx5PNBpDN9SBceIl98xMDpu2Suhinc0ZkJqr1G9nd2/u/Q6OmqmOmiOYj9fIWhwjfk/l3Cl2okzr1COa4jH9NQT6aQT1hEjxgU7okGDIW97R//zrB7Ocu6ReHZDElnB1VcgOm2iPX/InQdwn0QvbKBdM5GOSmhnlJInDAZ7zdYM1Tam1sEPEnqBVVEd6XMG9LONpoYvjHuYxaaJAt14vcPGLgqAq//YeBGl+Hp5c/IZ3NIR2Ve3ZGpmhr+900CC9EYLw2X1LAwOD6q3UTPi3eWr6PZdaF3iT7o8OTmH4K3fxO89avHj29BqO8nT669xUpP4MlxWl83CJSKH7Bn9nHKbdzphkCTsf9gT7XJT+2JH9EWvg4Z9xsRbZqIPkvInCfttVgsLrG3tcVfnLy+GzkDhoUAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;Naive Scale&quot;
+        title=&quot;Naive Scale&quot;
+        src=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png&quot;
+        srcset=&quot;/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/12f09/shyft_scale.png 148w,
+/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e4a3f/shyft_scale.png 295w,
+/bluealloy/static/b8ed71b6c0e9fc39f219724c43bbcb08/e3b18/shyft_scale.png 439w&quot;
+        sizes=&quot;(max-width: 439px) 100vw, 439px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;With transparent colors we can see zones where we want to take only x ( blue color) or take only y (marked with red). As noticeable our object is in original position that means our original&lt;em&gt;points is calculated same as in example with rotated object. Slope of diagonals that make these zones are calculated from original&lt;/em&gt;size with equation line&lt;em&gt;slope=original&lt;/em&gt;size.y/original&lt;em&gt;size.x. for second diagonal it is enough to just flip sign and we will get second slope. what we want to check if point is in blue or red space we can use fallowing if statement: (for abbreviate: op is original&lt;/em&gt;point, ls is line_slope): (op.y &amp;#x3C; ls&lt;em&gt;op.x &amp;#x26;&amp;#x26; op.y &gt; -ls&lt;/em&gt;op.x) || (op.y &gt; op.x&lt;em&gt;ls &amp;#x26;&amp;#x26; op.y &amp;#x3C; -ls&lt;/em&gt;op.x)  , and if statement is true do scale.y=scale.x if not do opposite. And at lastly don’t forget that when you are overriding one scale to not override its sign, in example from picture we are taking y scale and overriding x scale but we need to preserve x sign to properly scale our element ( x=sing(x)*abs(y)).&lt;/p&gt;
+&lt;h2&gt;TL/DR&lt;/h2&gt;
+&lt;p&gt;Summary of functions that was called throught the text:&lt;/p&gt;
+&lt;p&gt;Translation:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;M = M*translation(current_point-ref_point)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Rotation:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;crp=ref_point-center_point
+ccp=current_point-center_point
+angle = atan2(norm(cross(crp,ccp)), dot(crp,ccp))
+R= rotate(angle)
+T=translation(center_point)
+Tinv = inverse(T)
+M = M*Tinv*R*T&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Scale:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;Minv = inverse(M)
+original_current_point= Minv*current_point
+diff=original_position-original_corners[handler_id]
+
+T*S*Tin*M&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content:encoded></item><item><title><![CDATA[Second post]]></title><description><![CDATA[Wow! I love blogging so much already. Did you know that “despite its name, salted duck eggs can also be made from
+chicken eggs, though the…]]></description><link>https://rakita.github.com/my-second-post/</link><guid isPermaLink="false">https://rakita.github.com/my-second-post/</guid><pubDate>Fri, 01 May 2015 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;Wow! I love blogging so much already.&lt;/p&gt;
+&lt;p&gt;Did you know that “despite its name, salted duck eggs can also be made from
+chicken eggs, though the taste and texture will be somewhat different, and the
+egg yolk will be less rich.”?
+(&lt;a href=&quot;https://en.wikipedia.org/wiki/Salted_duck_egg&quot;&gt;Wikipedia Link&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Yeah, I didn’t either.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[New Beginnings]]></title><description><![CDATA[Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in…]]></description><link>https://rakita.github.com/new-beginnings/</link><guid isPermaLink="false">https://rakita.github.com/new-beginnings/</guid><pubDate>Fri, 01 May 2015 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in Bookmarksgrove
+right at the coast of the Semantics, a large language ocean. A small river named
+Duden flows by their place and supplies it with the necessary regelialia.&lt;/p&gt;
+&lt;h2&gt;On deer horse aboard tritely yikes and much&lt;/h2&gt;
+&lt;p&gt;The Big Oxmox advised her not to do so, because there were thousands of bad
+Commas, wild Question Marks and devious Semikoli, but the Little Blind Text
+didn’t listen. She packed her seven versalia, put her initial into the belt and
+made herself on the way.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This however showed weasel&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Well uncritical so misled&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;this is very interesting&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Goodness much until that fluid owl&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When she reached the first hills of the &lt;strong&gt;Italic Mountains&lt;/strong&gt;, she had a last
+view back on the skyline of her hometown &lt;em&gt;Bookmarksgrove&lt;/em&gt;, the headline of
+&lt;a href=&quot;http://google.com&quot;&gt;Alphabet Village&lt;/a&gt; and the subline of her own road, the Line
+Lane. Pityful a rhetoric question ran over her cheek, then she continued her
+way. On her way she met a copy.&lt;/p&gt;
+&lt;h3&gt;Overlaid the jeepers uselessly much excluding&lt;/h3&gt;
+&lt;p&gt;But nothing the copy said could convince her and so it didn’t take long until a
+few insidious Copy Writers ambushed her, made her drunk with
+&lt;a href=&quot;http://google.com&quot;&gt;Longe and Parole&lt;/a&gt; and dragged her into their agency, where
+they abused her for their projects again and again. And if she hasn’t been
+rewritten, then they are still using her.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in Bookmarksgrove
+right at the coast of the Semantics, a large language ocean.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It is a paradisematic country, in which roasted parts of sentences fly into your
+mouth. Even the all-powerful Pointing has no control about the blind texts it is
+an almost unorthographic life One day however a small line of blind text by the
+name of Lorem Ipsum decided to leave for the far World of Grammar.&lt;/p&gt;
+&lt;h3&gt;According a funnily until pre-set or arrogant well cheerful&lt;/h3&gt;
+&lt;p&gt;The Big Oxmox advised her not to do so, because there were thousands of bad
+Commas, wild Question Marks and devious Semikoli, but the Little Blind Text
+didn’t listen. She packed her seven versalia, put her initial into the belt and
+made herself on the way.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;So baboon this&lt;/li&gt;
+&lt;li&gt;Mounted militant weasel gregariously admonishingly straightly hey&lt;/li&gt;
+&lt;li&gt;Dear foresaw hungry and much some overhung&lt;/li&gt;
+&lt;li&gt;Rash opossum less because less some amid besides yikes jeepers frenetic
+impassive fruitlessly shut&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;When she reached the first hills of the Italic Mountains, she had a last view
+back on the skyline of her hometown Bookmarksgrove, the headline of Alphabet
+Village and the subline of her own road, the Line Lane. Pityful a rhetoric
+question ran over her cheek, then she continued her way. On her way she met a
+copy.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The copy warned the Little Blind Text, that where it came from it would have
+been rewritten a thousand times and everything that was left from its origin
+would be the word “and” and the Little Blind Text should turn around and
+return to its own, safe country.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But nothing the copy said could convince her and so it didn’t take long until a
+few insidious Copy Writers ambushed her, made her drunk with Longe and Parole
+and dragged her into their agency, where they abused her for their projects
+again and again. And if she hasn’t been rewritten, then they are still using
+her. Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts.&lt;/p&gt;
+&lt;h4&gt;Silent delightfully including because before one up barring chameleon&lt;/h4&gt;
+&lt;p&gt;Separated they live in Bookmarksgrove right at the coast of the Semantics, a
+large language ocean. A small river named Duden flows by their place and
+supplies it with the necessary regelialia. It is a paradisematic country, in
+which roasted parts of sentences fly into your mouth.&lt;/p&gt;
+&lt;p&gt;Even the all-powerful Pointing has no control about the blind texts it is an
+almost unorthographic life One day however a small line of blind text by the
+name of Lorem Ipsum decided to leave for the far World of Grammar. The Big Oxmox
+advised her not to do so, because there were thousands of bad Commas, wild
+Question Marks and devious Semikoli, but the Little Blind Text didn’t listen.&lt;/p&gt;
+&lt;h5&gt;Wherever far wow thus a squirrel raccoon jeez jaguar this from along&lt;/h5&gt;
+&lt;p&gt;She packed her seven versalia, put her initial into the belt and made herself on
+the way. When she reached the first hills of the Italic Mountains, she had a
+last view back on the skyline of her hometown Bookmarksgrove, the headline of
+Alphabet Village and the subline of her own road, the Line Lane. Pityful a
+rhetoric question ran over her cheek, then she continued her way. On her way she
+met a copy.&lt;/p&gt;
+&lt;h6&gt;Slapped cozy a that lightheartedly and far&lt;/h6&gt;
+&lt;p&gt;The copy warned the Little Blind Text, that where it came from it would have
+been rewritten a thousand times and everything that was left from its origin
+would be the word “and” and the Little Blind Text should turn around and return
+to its own, safe country. But nothing the copy said could convince her and so it
+didn’t take long until a few insidious Copy Writers ambushed her, made her drunk
+with Longe and Parole and dragged her into their agency, where they abused her
+for their projects again and again.&lt;/p&gt;</content:encoded></item></channel></rss>
